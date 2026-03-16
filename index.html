@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>F1 Race Relay</title>
+<style>
+/* ── Reset & tokens ───────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#355872;   --p-dark:#2A4A62;
+  --a1:#7AAACE;  --a2:#9CD5FF;
+  --bg:#F7F8F0;  --sec:#81A6C6;
+  --mut:#AACDDC; --warm:#F3E3D0;
+  --bdr:#D2C4B4; --white:#ffffff;
+  --text:#1E2D3A; --mid:#4A6278; --light:#7A95A8;
+  --gold:#D4A843; --silver:#9BA8B0; --bronze:#B07D52;
+  --green:#2E7D6B; --green-bg:#E8F5F0;
+  --orange:#B05E00; --orange-bg:#FFF3E0;
+  --red:#C62828; --red-bg:#FFEBEE;
+  --radius:8px; --radius-lg:12px;
+  --shadow:0 2px 12px rgba(53,88,114,.08);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;
+  color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;
+  display:flex;flex-direction:column}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+.hdr{background:linear-gradient(135deg,var(--p),var(--p-dark));
+  padding:0 28px;height:58px;display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0;
+  border-bottom:1px solid rgba(0,0,0,.18)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{width:32px;height:32px;border-radius:6px;
+  background:rgba(255,255,255,.15);display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:13px;color:#fff;
+  letter-spacing:.5px;font-family:'Courier New',monospace}
+.hdr-title{color:#fff;font-size:16px;font-weight:700;letter-spacing:4px;
+  font-family:'Courier New',monospace}
+.hdr-right{display:flex;align-items:center;gap:16px}
+.hdr-author{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:1px}
+.api-badge{display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.1);border-radius:20px;
+  padding:4px 10px;cursor:pointer}
+.api-dot{width:7px;height:7px;border-radius:50%;background:#9BA8B0;
+  transition:background .3s}
+.api-dot.ok{background:#4CAF82}
+.api-dot.err{background:#E05252}
+.api-dot.loading{background:var(--a2);animation:blink .8s ease-in-out infinite}
+.api-label{color:rgba(255,255,255,.65);font-size:11px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── Controls bar ─────────────────────────────────────────────────────── */
+.ctrl{background:var(--white);border-bottom:1px solid var(--bdr);
+  padding:16px 28px;flex-shrink:0}
+.ctrl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  margin-bottom:14px}
+.drop-group label{display:block;font-size:10px;font-weight:700;
+  letter-spacing:1.5px;color:var(--mid);margin-bottom:5px;
+  text-transform:uppercase}
+select{width:100%;padding:9px 32px 9px 12px;
+  border:1.5px solid var(--bdr);border-radius:var(--radius);
+  background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23355872'/%3E%3C/svg%3E") no-repeat calc(100% - 10px) 50%;
+  color:var(--text);font-size:12px;cursor:pointer;appearance:none;outline:none;
+  transition:border-color .2s}
+select:focus{border-color:var(--a1)}
+select:hover{border-color:var(--sec)}
+.btn-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.btn{padding:10px 0;border:none;border-radius:var(--radius);
+  font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;
+  text-transform:uppercase;transition:all .15s;display:flex;
+  align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--a1),var(--p));color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,var(--a2),var(--a1));
+  transform:translateY(-1px);box-shadow:0 4px 12px rgba(53,88,114,.25)}
+.btn-primary:active{transform:translateY(0)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none !important}
+
+/* ── Main two-col layout ──────────────────────────────────────────────── */
+.main{display:grid;grid-template-columns:320px 1fr;flex:1;min-height:0}
+
+/* ── Left panel ───────────────────────────────────────────────────────── */
+.left{padding:20px;border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+
+.card{background:var(--white);border:1px solid var(--bdr);
+  border-radius:var(--radius-lg);padding:16px 18px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;border-radius:3px 0 0 3px}
+.card-primary::before{background:var(--p)}
+.card-accent::before{background:var(--a1)}
+.card-warm::before{background:var(--gold)}
+
+.card-title{font-size:10px;font-weight:700;letter-spacing:2px;
+  color:var(--mid);text-transform:uppercase;margin-bottom:12px;
+  padding-left:4px}
+.kv{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px dotted var(--bdr)}
+.kv:last-child{border-bottom:none}
+.kv-key{color:var(--light);font-size:11px;letter-spacing:.3px}
+.kv-val{color:var(--text);font-weight:600;font-size:12px;
+  font-family:'Courier New',monospace;text-align:right;max-width:180px;
+  word-break:break-word}
+.kv-val.gold{color:var(--gold)}
+.kv-val.blue{color:var(--p)}
+.kv-val.green{color:var(--green)}
+
+/* KPI row inside left panel */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--bg);border:1px solid var(--bdr);
+  border-radius:var(--radius);padding:10px 12px}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:1.5px;
+  color:var(--light);text-transform:uppercase;margin-bottom:4px}
+.kpi-val{font-size:18px;font-weight:700;
+  font-family:'Courier New',monospace;color:var(--p)}
+
+/* ── Right panel ──────────────────────────────────────────────────────── */
+.right{padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0}
+.results-title{font-size:10px;font-weight:700;letter-spacing:2px;
+  color:var(--mid);text-transform:uppercase}
+.status-pill{padding:4px 12px;border-radius:20px;font-size:10px;
+  font-weight:600;letter-spacing:.5px;transition:all .2s}
+.s-ready  {background:var(--green-bg); color:var(--green)}
+.s-loading{background:var(--orange-bg);color:var(--orange)}
+.s-loaded {background:#E3F2FD;color:var(--p)}
+.s-error  {background:var(--red-bg);  color:var(--red)}
+
+/* Progress bar */
+.prog-wrap{height:3px;background:var(--bdr);border-radius:2px;
+  overflow:hidden;flex-shrink:0}
+.prog-bar{height:100%;width:0%;
+  background:linear-gradient(90deg,var(--a1),var(--a2));
+  border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* Terminal */
+.terminal{background:#192231;border-radius:var(--radius-lg);
+  padding:18px 20px;
+  font-family:'JetBrains Mono','Cascadia Code','Courier New',monospace;
+  font-size:12px;line-height:1.75;color:#C8D8E8;
+  overflow-y:auto;flex:1;min-height:0;
+  border:1px solid #0D1B2A;white-space:pre}
+.terminal .dim{color:#4A6278}
+.terminal .hd {color:var(--a2);font-weight:700}
+.terminal .gold{color:var(--gold)}
+.terminal .sky{color:var(--a2)}
+.terminal .grn{color:#4CAF82}
+.terminal .red{color:#E57373}
+.terminal .sep{color:#355872}
+.terminal .p2{color:#9CD5FF}
+.terminal .p3{color:#AACDDC}
+.terminal .tag{color:#81A6C6}
+
+/* ── Status bar ───────────────────────────────────────────────────────── */
+.statusbar{background:var(--warm);border-top:1px solid var(--bdr);
+  padding:7px 28px;font-size:11px;color:var(--mid);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0}
+.statusbar-ts{color:var(--light);font-size:10px;
+  font-family:'Courier New',monospace}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+footer{background:var(--white);border-top:1px solid var(--bdr);
+  padding:8px;text-align:center;font-size:10px;color:var(--light);
+  letter-spacing:.5px;flex-shrink:0}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .main{grid-template-columns:1fr}
+  .left{border-right:none;border-bottom:1px solid var(--bdr);max-height:none}
+  .ctrl-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .ctrl-grid{grid-template-columns:1fr}
+  .btn-row{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">F1</div>
+    <span class="hdr-title">RACE&nbsp;&nbsp;RELAY</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-author">Stuti Mistry</span>
+    <div class="api-badge" title="API status — click to ping" onclick="pingAPI()">
+      <div class="api-dot" id="api-dot"></div>
+      <span class="api-label" id="api-label">API</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Controls ────────────────────────────────────────────────────────── -->
+<div class="ctrl">
+  <div class="ctrl-grid">
+    <div class="drop-group">
+      <label>Season</label>
+      <select id="sel-year">
+        <option>2024</option><option selected>2023</option>
+        <option>2022</option><option>2021</option>
+      </select>
+    </div>
+    <div class="drop-group">
+      <label>Grand Prix</label>
+      <select id="sel-track">
+        <option>Bahrain</option><option selected>Monaco</option>
+        <option>Silverstone</option><option>Spa</option>
+        <option>Monza</option><option>Hungaroring</option>
+        <option>Suzuka</option><option>Imola</option>
+        <option>Zandvoort</option><option>Singapore</option>
+      </select>
+    </div>
+    <div class="drop-group">
+      <label>Driver 1</label>
+      <select id="sel-d1">
+        <option selected>HAM</option><option>VER</option><option>LEC</option>
+        <option>NOR</option><option>SAI</option><option>RUS</option>
+        <option>PER</option><option>ALO</option>
+      </select>
+    </div>
+    <div class="drop-group">
+      <label>Driver 2</label>
+      <select id="sel-d2">
+        <option>HAM</option><option selected>VER</option><option>LEC</option>
+        <option>NOR</option><option>SAI</option><option>RUS</option>
+        <option>PER</option><option>ALO</option>
+      </select>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-load"  onclick="loadRace()">
+      ▶&nbsp; Load Race Data
+    </button>
+    <button class="btn btn-primary" id="btn-vis"   onclick="genVis()">
+      ◈&nbsp; Generate Visuals
+    </button>
+    <button class="btn btn-primary" id="btn-cmp"   onclick="compareDrivers()">
+      ⇄&nbsp; Compare Drivers
+    </button>
+  </div>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Left panel -->
+  <div class="left">
+
+    <!-- KPI strip -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Winner</div>
+        <div class="kpi-val" id="kpi-winner" style="font-size:14px;letter-spacing:1px">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Laps</div>
+        <div class="kpi-val" id="kpi-laps">—</div>
+      </div>
+    </div>
+
+    <!-- Race info card -->
+    <div class="card card-primary">
+      <div class="card-title">Race Info</div>
+      <div class="kv"><span class="kv-key">Season</span>  <span class="kv-val" id="ci-year">—</span></div>
+      <div class="kv"><span class="kv-key">Circuit</span> <span class="kv-val" id="ci-track">—</span></div>
+      <div class="kv"><span class="kv-key">Event</span>   <span class="kv-val" id="ci-event">—</span></div>
+      <div class="kv"><span class="kv-key">Date</span>    <span class="kv-val" id="ci-date">—</span></div>
+      <div class="kv"><span class="kv-key">Total Laps</span><span class="kv-val" id="ci-laps">—</span></div>
+      <div class="kv"><span class="kv-key">Winner</span>  <span class="kv-val gold" id="ci-winner">—</span></div>
+      <div class="kv"><span class="kv-key">Team</span>    <span class="kv-val" id="ci-team">—</span></div>
+      <div class="kv"><span class="kv-key">Finishers</span><span class="kv-val" id="ci-fin">—</span></div>
+    </div>
+
+    <!-- Fastest lap card -->
+    <div class="card card-accent">
+      <div class="card-title">Fastest Lap</div>
+      <div class="kv"><span class="kv-key">Driver</span>   <span class="kv-val blue" id="fl-drv">—</span></div>
+      <div class="kv"><span class="kv-key">Time</span>     <span class="kv-val" id="fl-time">—</span></div>
+      <div class="kv"><span class="kv-key">Lap No.</span>  <span class="kv-val" id="fl-lap">—</span></div>
+      <div class="kv"><span class="kv-key">Compound</span> <span class="kv-val" id="fl-tire">—</span></div>
+    </div>
+
+    <!-- API info card -->
+    <div class="card card-warm">
+      <div class="card-title">Backend</div>
+      <div class="kv"><span class="kv-key">API</span>      <span class="kv-val" id="be-api">localhost:5000</span></div>
+      <div class="kv"><span class="kv-key">Cache</span>    <span class="kv-val" id="be-cache">data_cache/</span></div>
+      <div class="kv"><span class="kv-key">Plots</span>    <span class="kv-val" id="be-plots">—</span></div>
+      <div class="kv"><span class="kv-key">Status</span>   <span class="kv-val green" id="be-status">—</span></div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- Right panel -->
+  <div class="right">
+    <div class="results-hdr">
+      <span class="results-title">Results Display</span>
+      <span class="status-pill s-ready" id="status-pill">Ready</span>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-bar" id="prog"></div>
+    </div>
+    <div class="terminal" id="terminal"><span class="dim">╔════════════════════════════════════════════════════════════╗
+║   F1 Race Relay  ·  Analysis Dashboard  v2.0               ║
+╚════════════════════════════════════════════════════════════╝
+
+  Select a season and circuit above, then use the buttons:
+
+  ▶ LOAD RACE DATA    →  Full race classification table
+  ◈ GENERATE VISUALS  →  Saves charts to output folders
+  ⇄ COMPARE DRIVERS   →  Head-to-head lap delta
+
+  Backend: http://localhost:5000  (run: python api.py)</span>
+    </div>
+  </div><!-- /right -->
+
+</div><!-- /main -->
+
+<!-- ── Status bar ──────────────────────────────────────────────────────── -->
+<div class="statusbar">
+  <span id="statusbar">Ready to analyze Formula 1 races</span>
+  <span class="statusbar-ts" id="statusbar-ts"></span>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────── -->
+<footer>F1 Race Relay v2.0&nbsp;&nbsp;·&nbsp;&nbsp;FastF1 + Flask + Python&nbsp;&nbsp;·&nbsp;&nbsp;Stuti Mistry</footer>
+
+<script>
+/* ── Config ─────────────────────────────────────────────────────────── */
+const API = "http://localhost:5000";
+
+/* ── Utility ────────────────────────────────────────────────────────── */
+function q(id){ return document.getElementById(id) }
+
+function pad(str, n, right=false){
+  str = String(str ?? "—");
+  return right ? str.padEnd(n).slice(0,n) : str.padStart(n).slice(0,n);
+}
+
+function esc(s){
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setStatus(text, cls){
+  const p = q('status-pill');
+  p.textContent = text;
+  p.className = 'status-pill ' + cls;
+}
+
+function setProgress(pct){
+  q('prog').style.width = pct + '%';
+}
+
+function setStatusBar(msg){
+  q('statusbar').textContent = msg;
+  q('statusbar-ts').textContent = new Date().toLocaleTimeString();
+}
+
+function setBtns(disabled){
+  ['btn-load','btn-vis','btn-cmp'].forEach(id => q(id).disabled = disabled);
+}
+
+function setDot(state){
+  const dot = q('api-dot'), lbl = q('api-label');
+  dot.className = 'api-dot ' + state;
+  lbl.textContent = state === 'ok' ? 'Connected'
+                  : state === 'err' ? 'Offline'
+                  : state === 'loading' ? 'Connecting…'
+                  : 'API';
+}
+
+function terminal(html){
+  q('terminal').innerHTML = html;
+}
+
+/* ── Separators ─────────────────────────────────────────────────────── */
+const SEP76 = '═'.repeat(76);
+const HR76  = '─'.repeat(76);
+const SEP60 = '╌'.repeat(60);
+const BIG60 = '═'.repeat(60);
+
+/* ── API ping ───────────────────────────────────────────────────────── */
+async function pingAPI(){
+  setDot('loading');
+  try {
+    const res  = await fetch(`${API}/health`, {signal: AbortSignal.timeout(4000)});
+    const data = await res.json();
+    setDot('ok');
+    q('be-status').textContent = 'Online';
+    q('be-plots').textContent  = data.hasPlots ? 'Enabled' : 'Disabled';
+    setStatusBar('API connected — ' + data.status);
+  } catch(e){
+    setDot('err');
+    q('be-status').textContent = 'Offline';
+    setStatusBar('API offline — run: python api.py');
+    terminal(
+      `<span class="red">✗  Cannot reach API at ${API}</span>\n\n` +
+      `<span class="dim">Make sure the backend is running:\n` +
+      `  pip install flask flask-cors fastf1 pandas\n` +
+      `  python api.py\n\n` +
+      `Then reload this page.</span>`
+    );
+  }
+}
+
+/* ── Load Race ──────────────────────────────────────────────────────── */
+async function loadRace(){
+  const year  = q('sel-year').value;
+  const track = q('sel-track').value;
+
+  setStatus('Loading…', 's-loading');
+  setStatusBar(`Loading ${year} ${track} Grand Prix…`);
+  setProgress(15);
+  setBtns(true);
+  setDot('loading');
+
+  try {
+    setProgress(35);
+    const res  = await fetch(`${API}/race?year=${year}&track=${encodeURIComponent(track)}`);
+    setProgress(70);
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+    setProgress(100);
+
+    /* ── Update left cards ── */
+    q('kpi-winner').textContent = data.winnerCode || data.winner || '—';
+    q('kpi-laps').textContent   = data.totalLaps  || '—';
+    q('ci-year').textContent    = data.year;
+    q('ci-track').textContent   = data.track;
+    q('ci-event').textContent   = data.eventName  || '—';
+    q('ci-date').textContent    = data.eventDate  || '—';
+    q('ci-laps').textContent    = data.totalLaps  || '—';
+    q('ci-winner').textContent  = data.winner     || '—';
+    q('ci-team').textContent    = data.winnerTeam || '—';
+    q('ci-fin').textContent     = data.finishers  || '—';
+    q('fl-drv').textContent     = data.fastestLap?.driver || '—';
+    q('fl-time').textContent    = data.fastestLap?.time   || '—';
+    q('fl-lap').textContent     = data.fastestLap?.lap    || '—';
+    q('fl-tire').textContent    = data.fastestLap?.tire   || '—';
+
+    /* ── Build terminal output ── */
+    let out = '';
+    out += `<span class="sep">${SEP76}</span>\n`;
+    out += `<span class="gold">${esc(data.year)} ${esc(data.eventName || data.track).toUpperCase()} · RACE RESULTS</span>\n`;
+    out += `<span class="sep">${SEP76}</span>\n\n`;
+    out += `<span class="dim">Date       : </span>${esc(data.eventDate)}\n`;
+    out += `<span class="dim">Circuit    : </span>${esc(data.eventName)}\n`;
+    out += `<span class="dim">Total Laps : </span>${esc(data.totalLaps)}\n\n`;
+
+    out += `<span class="hd">${pad('POS',4)}  ${pad('DRV',4)}  ${pad('DRIVER',22,true)}  ${pad('TEAM',22,true)}  ${pad('TIME',13,true)}  GAP</span>\n`;
+    out += `<span class="sep">${HR76}</span>\n`;
+
+    (data.results || []).forEach(r => {
+      const cls = r.pos === 1 ? 'gold'
+                : r.pos === 2 ? 'p2'
+                : r.pos === 3 ? 'p3' : '';
+      const open  = cls ? `<span class="${cls}">` : '';
+      const close = cls ? '</span>'               : '';
+      out += open;
+      out += `${pad(r.pos,4)}  ${pad(esc(r.code),4,true)}  `;
+      out += `${pad(esc(r.driver),22,true)}  `;
+      out += `${pad(esc(r.team),22,true)}  `;
+      out += `${pad(esc(r.time),13,true)}  ${esc(r.gap)}`;
+      out += close + '\n';
+    });
+
+    out += `<span class="sep">${HR76}</span>\n\n`;
+    out += `<span class="dim">Fastest Lap : </span><span class="grn">${esc(data.fastestLap?.time)} · ${esc(data.fastestLap?.driver)} (Lap ${esc(data.fastestLap?.lap)} · ${esc(data.fastestLap?.tire)})</span>\n`;
+    out += `<span class="dim">Classified  : </span>${data.finishers} drivers\n`;
+    out += `\n<span class="sep">${SEP76}</span>`;
+
+    terminal(out);
+    setStatus('Loaded', 's-loaded');
+    setDot('ok');
+    setStatusBar(`Loaded: ${year} ${track} Grand Prix  (${data.finishers} classified)`);
+
+  } catch(e){
+    setStatus('Error', 's-error');
+    setDot('err');
+    setStatusBar('Error loading race data');
+    terminal(
+      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
+      `<span class="dim">Check that api.py is running and this circuit is available.</span>`
+    );
+  } finally {
+    setBtns(false);
+    setTimeout(() => setProgress(0), 900);
+  }
+}
+
+/* ── Generate Visuals ───────────────────────────────────────────────── */
+async function genVis(){
+  const year  = q('sel-year').value;
+  const track = q('sel-track').value;
+
+  setStatus('Generating…', 's-loading');
+  setStatusBar(`Generating visualizations for ${year} ${track}…`);
+  setProgress(20);
+  setBtns(true);
+  setDot('loading');
+
+  // optimistic terminal message while waiting
+  terminal(
+    `<span class="sep">${SEP76}</span>\n` +
+    `<span class="gold">GENERATE VISUALS  ·  ${esc(year)} ${esc(track).toUpperCase()}</span>\n` +
+    `<span class="sep">${SEP76}</span>\n\n` +
+    `<span class="tag">  Calling Python backend → modern_plots.py …</span>\n` +
+    `<span class="dim">  This may take 20–60 s on first run (FastF1 downloading data)</span>`
+  );
+
+  try {
+    setProgress(45);
+    const res  = await fetch(`${API}/visuals?year=${year}&track=${encodeURIComponent(track)}`);
+    setProgress(85);
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+    setProgress(100);
+
+    let out = '';
+    out += `<span class="sep">${SEP76}</span>\n`;
+    out += `<span class="gold">GENERATE VISUALS  ·  ${esc(year)} ${esc(track).toUpperCase()}</span>\n`;
+    out += `<span class="sep">${SEP76}</span>\n\n`;
+    (data.files || []).forEach(f => {
+      out += `<span class="grn">✓</span>  ${esc(f)}\n`;
+    });
+    out += `\n<span class="dim">Python stack: FastF1 + Matplotlib + Plotly</span>\n`;
+    out += `<span class="dim">Open the files above to view your plots.</span>\n`;
+    out += `\n<span class="sep">${SEP76}</span>`;
+
+    terminal(out);
+    setStatus('Done', 's-loaded');
+    setDot('ok');
+    setStatusBar(`Visuals complete — ${year} ${track}`);
+
+  } catch(e){
+    setStatus('Error', 's-error');
+    setDot('err');
+    setStatusBar('Error generating visuals');
+    terminal(
+      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
+      `<span class="dim">Is modern_plots.py in the same folder as api.py?\n` +
+      `Does it define generate_all_visuals(year, track)?</span>`
+    );
+  } finally {
+    setBtns(false);
+    setTimeout(() => setProgress(0), 900);
+  }
+}
+
+/* ── Compare Drivers ────────────────────────────────────────────────── */
+async function compareDrivers(){
+  const year  = q('sel-year').value;
+  const track = q('sel-track').value;
+  const d1    = q('sel-d1').value;
+  const d2    = q('sel-d2').value;
+
+  if (d1 === d2){
+    setStatus('Error', 's-error');
+    setStatusBar('Please select two different drivers');
+    terminal(`<span class="red">✗  Please select two different drivers to compare.</span>`);
+    return;
+  }
+
+  setStatus('Loading…', 's-loading');
+  setStatusBar(`Comparing ${d1} vs ${d2}  ·  ${year} ${track}…`);
+  setProgress(20);
+  setBtns(true);
+  setDot('loading');
+
+  try {
+    setProgress(50);
+    const res  = await fetch(
+      `${API}/compare?year=${year}&track=${encodeURIComponent(track)}&d1=${d1}&d2=${d2}`
+    );
+    setProgress(85);
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+    setProgress(100);
+
+    const s1 = data.d1;
+    const s2 = data.d2;
+
+    let out = '';
+    out += `<span class="sep">${BIG60}</span>\n`;
+    out += `<span class="gold">DRIVER COMPARISON  ·  ${esc(d1)}  vs  ${esc(d2)}</span>\n`;
+    out += `<span class="dim">Race: ${esc(year)} ${esc(track)} Grand Prix</span>\n`;
+    out += `<span class="sep">${BIG60}</span>\n\n`;
+
+    out += `<span class="hd">FASTEST LAP</span>\n`;
+    out += `<span class="sep">${SEP60}</span>\n`;
+    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.fastest)}  `;
+    out += `(Lap ${esc(s1.fastLap)})  ·  ${esc(s1.team)}\n`;
+    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.fastest)}  `;
+    out += `(Lap ${esc(s2.fastLap)})  ·  ${esc(s2.team)}\n\n`;
+
+    if (data.faster && data.delta !== null){
+      out += `  <span class="grn">⚡  ${esc(data.faster)} is faster by ${data.delta}s on best lap</span>\n\n`;
+    }
+
+    out += `<span class="hd">AVERAGE LAP</span>\n`;
+    out += `<span class="sep">${SEP60}</span>\n`;
+    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.avgLap)}\n`;
+    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.avgLap)}\n\n`;
+
+    out += `<span class="hd">FINISHING POSITION</span>\n`;
+    out += `<span class="sep">${SEP60}</span>\n`;
+    out += `  <span class="gold">${esc(d1)}</span>  →  P${esc(s1.position)}\n`;
+    out += `  <span class="sky">${esc(d2)}</span>  →  P${esc(s2.position)}\n`;
+    const posWinner = s1.position < s2.position ? d1 : s2.position < s1.position ? d2 : null;
+    if (posWinner){
+      out += `\n  <span class="grn">🏁  ${esc(posWinner)} finished higher on the road</span>\n`;
+    }
+    out += `\n<span class="hd">TOTAL LAPS COMPLETED</span>\n`;
+    out += `<span class="sep">${SEP60}</span>\n`;
+    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.totalLaps)} laps\n`;
+    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.totalLaps)} laps\n`;
+
+    out += `\n<span class="sep">${BIG60}</span>`;
+
+    terminal(out);
+    setStatus('Loaded', 's-loaded');
+    setDot('ok');
+    setStatusBar(`Comparison complete: ${d1} vs ${d2}  ·  ${year} ${track}`);
+
+  } catch(e){
+    setStatus('Error', 's-error');
+    setDot('err');
+    setStatusBar('Error comparing drivers');
+    terminal(
+      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
+      `<span class="dim">Make sure both drivers participated in this race.</span>`
+    );
+  } finally {
+    setBtns(false);
+    setTimeout(() => setProgress(0), 900);
+  }
+}
+
+/* ── Init ───────────────────────────────────────────────────────────── */
+(function init(){
+  // timestamp ticker
+  function tick(){
+    q('statusbar-ts').textContent = new Date().toLocaleTimeString();
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // auto-ping API on load
+  pingAPI();
+})();
+</script>
+</body>
+</html>
