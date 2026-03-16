@@ -66,8 +66,8 @@ launch.py                    →  Unified project launcher
 
 ### Install
 ```bash
-git clone https://github.com/StutiMistry147/f1-race-relay.git
-cd f1-race-relay
+git clone https://github.com/StutiMistry147/F1-Race-Relay.git
+cd F1-Race-Relay
 pip install -r requirements.txt
 ```
 
