@@ -108,11 +108,6 @@ python launch.py
 | `GET /health` | — | API status and config |
 | `GET /seasons` | — | Available years |
 ```bash
-# Examples
-curl "http://localhost:5000/race?year=2023&track=Monaco"
-curl "http://localhost:5000/compare?year=2023&track=Monaco&d1=HAM&d2=VER"
-```
-
 ---
 
 ## Generated Outputs
