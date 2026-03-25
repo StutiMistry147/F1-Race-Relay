@@ -3,662 +3,688 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>F1 Race Relay</title>
+<title>Apex Precision | F1 Race Relay Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#414751",
+              "on-primary": "#ffffff",
+              "surface-variant": "#e1e2e4",
+              "surface-container-low": "#f2f4f6",
+              "on-tertiary": "#ffffff",
+              "on-primary-fixed-variant": "#004883",
+              "on-secondary-container": "#5e6570",
+              "surface-container-high": "#e7e8ea",
+              "on-primary-container": "#fdfcff",
+              "surface-container-highest": "#e1e2e4",
+              "on-surface": "#191c1e",
+              "on-tertiary-container": "#fffbff",
+              "surface": "#f8f9fb",
+              "surface-bright": "#f8f9fb",
+              "on-secondary": "#ffffff",
+              "surface-container": "#edeef0",
+              "primary-fixed": "#d4e3ff",
+              "surface-dim": "#d9dadc",
+              "tertiary-container": "#a06900",
+              "inverse-surface": "#2e3132",
+              "secondary": "#585f6a",
+              "tertiary-fixed-dim": "#ffb953",
+              "surface-tint": "#0060ac",
+              "on-secondary-fixed": "#151c25",
+              "tertiary-fixed": "#ffddb4",
+              "inverse-primary": "#a4c9ff",
+              "tertiary": "#7f5300",
+              "primary": "#005da7",
+              "on-tertiary-fixed": "#291800",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#dce3f0",
+              "on-background": "#191c1e",
+              "inverse-on-surface": "#f0f1f3",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "outline-variant": "#c1c7d3",
+              "outline": "#717783",
+              "background": "#f8f9fb",
+              "primary-fixed-dim": "#a4c9ff",
+              "on-tertiary-fixed-variant": "#633f00",
+              "error": "#ba1a1a",
+              "secondary-fixed-dim": "#c0c7d3",
+              "secondary-fixed": "#dce3f0",
+              "primary-container": "#2976c7",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed-variant": "#404752",
+              "on-primary-fixed": "#001c39"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
 <style>
-/* ── Reset & tokens ───────────────────────────────────────────────────── */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --p:#355872;   --p-dark:#2A4A62;
-  --a1:#7AAACE;  --a2:#9CD5FF;
-  --bg:#F7F8F0;  --sec:#81A6C6;
-  --mut:#AACDDC; --warm:#F3E3D0;
-  --bdr:#D2C4B4; --white:#ffffff;
-  --text:#1E2D3A; --mid:#4A6278; --light:#7A95A8;
-  --gold:#D4A843; --silver:#9BA8B0; --bronze:#B07D52;
-  --green:#2E7D6B; --green-bg:#E8F5F0;
-  --orange:#B05E00; --orange-bg:#FFF3E0;
-  --red:#C62828; --red-bg:#FFEBEE;
-  --radius:8px; --radius-lg:12px;
-  --shadow:0 2px 12px rgba(53,88,114,.08);
-}
-
-/* ── Base ─────────────────────────────────────────────────────────────── */
-body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;
-  color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;
-  display:flex;flex-direction:column}
-
-/* ── Header ───────────────────────────────────────────────────────────── */
-.hdr{background:linear-gradient(135deg,var(--p),var(--p-dark));
-  padding:0 28px;height:58px;display:flex;align-items:center;
-  justify-content:space-between;flex-shrink:0;
-  border-bottom:1px solid rgba(0,0,0,.18)}
-.hdr-brand{display:flex;align-items:center;gap:12px}
-.hdr-logo{width:32px;height:32px;border-radius:6px;
-  background:rgba(255,255,255,.15);display:flex;align-items:center;
-  justify-content:center;font-weight:800;font-size:13px;color:#fff;
-  letter-spacing:.5px;font-family:'Courier New',monospace}
-.hdr-title{color:#fff;font-size:16px;font-weight:700;letter-spacing:4px;
-  font-family:'Courier New',monospace}
-.hdr-right{display:flex;align-items:center;gap:16px}
-.hdr-author{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:1px}
-.api-badge{display:flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,.1);border-radius:20px;
-  padding:4px 10px;cursor:pointer}
-.api-dot{width:7px;height:7px;border-radius:50%;background:#9BA8B0;
-  transition:background .3s}
-.api-dot.ok{background:#4CAF82}
-.api-dot.err{background:#E05252}
-.api-dot.loading{background:var(--a2);animation:blink .8s ease-in-out infinite}
-.api-label{color:rgba(255,255,255,.65);font-size:11px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* ── Controls bar ─────────────────────────────────────────────────────── */
-.ctrl{background:var(--white);border-bottom:1px solid var(--bdr);
-  padding:16px 28px;flex-shrink:0}
-.ctrl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
-  margin-bottom:14px}
-.drop-group label{display:block;font-size:10px;font-weight:700;
-  letter-spacing:1.5px;color:var(--mid);margin-bottom:5px;
-  text-transform:uppercase}
-select{width:100%;padding:9px 32px 9px 12px;
-  border:1.5px solid var(--bdr);border-radius:var(--radius);
-  background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23355872'/%3E%3C/svg%3E") no-repeat calc(100% - 10px) 50%;
-  color:var(--text);font-size:12px;cursor:pointer;appearance:none;outline:none;
-  transition:border-color .2s}
-select:focus{border-color:var(--a1)}
-select:hover{border-color:var(--sec)}
-.btn-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.btn{padding:10px 0;border:none;border-radius:var(--radius);
-  font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;
-  text-transform:uppercase;transition:all .15s;display:flex;
-  align-items:center;justify-content:center;gap:6px}
-.btn-primary{background:linear-gradient(135deg,var(--a1),var(--p));color:#fff}
-.btn-primary:hover{background:linear-gradient(135deg,var(--a2),var(--a1));
-  transform:translateY(-1px);box-shadow:0 4px 12px rgba(53,88,114,.25)}
-.btn-primary:active{transform:translateY(0)}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none !important}
-
-/* ── Main two-col layout ──────────────────────────────────────────────── */
-.main{display:grid;grid-template-columns:320px 1fr;flex:1;min-height:0}
-
-/* ── Left panel ───────────────────────────────────────────────────────── */
-.left{padding:20px;border-right:1px solid var(--bdr);
-  display:flex;flex-direction:column;gap:16px;overflow-y:auto}
-
-.card{background:var(--white);border:1px solid var(--bdr);
-  border-radius:var(--radius-lg);padding:16px 18px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;border-radius:3px 0 0 3px}
-.card-primary::before{background:var(--p)}
-.card-accent::before{background:var(--a1)}
-.card-warm::before{background:var(--gold)}
-
-.card-title{font-size:10px;font-weight:700;letter-spacing:2px;
-  color:var(--mid);text-transform:uppercase;margin-bottom:12px;
-  padding-left:4px}
-.kv{display:flex;justify-content:space-between;align-items:center;
-  padding:7px 0;border-bottom:1px dotted var(--bdr)}
-.kv:last-child{border-bottom:none}
-.kv-key{color:var(--light);font-size:11px;letter-spacing:.3px}
-.kv-val{color:var(--text);font-weight:600;font-size:12px;
-  font-family:'Courier New',monospace;text-align:right;max-width:180px;
-  word-break:break-word}
-.kv-val.gold{color:var(--gold)}
-.kv-val.blue{color:var(--p)}
-.kv-val.green{color:var(--green)}
-
-/* KPI row inside left panel */
-.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kpi{background:var(--bg);border:1px solid var(--bdr);
-  border-radius:var(--radius);padding:10px 12px}
-.kpi-label{font-size:9px;font-weight:700;letter-spacing:1.5px;
-  color:var(--light);text-transform:uppercase;margin-bottom:4px}
-.kpi-val{font-size:18px;font-weight:700;
-  font-family:'Courier New',monospace;color:var(--p)}
-
-/* ── Right panel ──────────────────────────────────────────────────────── */
-.right{padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0}
-.results-hdr{display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0}
-.results-title{font-size:10px;font-weight:700;letter-spacing:2px;
-  color:var(--mid);text-transform:uppercase}
-.status-pill{padding:4px 12px;border-radius:20px;font-size:10px;
-  font-weight:600;letter-spacing:.5px;transition:all .2s}
-.s-ready  {background:var(--green-bg); color:var(--green)}
-.s-loading{background:var(--orange-bg);color:var(--orange)}
-.s-loaded {background:#E3F2FD;color:var(--p)}
-.s-error  {background:var(--red-bg);  color:var(--red)}
-
-/* Progress bar */
-.prog-wrap{height:3px;background:var(--bdr);border-radius:2px;
-  overflow:hidden;flex-shrink:0}
-.prog-bar{height:100%;width:0%;
-  background:linear-gradient(90deg,var(--a1),var(--a2));
-  border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
-
-/* Terminal */
-.terminal{background:#192231;border-radius:var(--radius-lg);
-  padding:18px 20px;
-  font-family:'JetBrains Mono','Cascadia Code','Courier New',monospace;
-  font-size:12px;line-height:1.75;color:#C8D8E8;
-  overflow-y:auto;flex:1;min-height:0;
-  border:1px solid #0D1B2A;white-space:pre}
-.terminal .dim{color:#4A6278}
-.terminal .hd {color:var(--a2);font-weight:700}
-.terminal .gold{color:var(--gold)}
-.terminal .sky{color:var(--a2)}
-.terminal .grn{color:#4CAF82}
-.terminal .red{color:#E57373}
-.terminal .sep{color:#355872}
-.terminal .p2{color:#9CD5FF}
-.terminal .p3{color:#AACDDC}
-.terminal .tag{color:#81A6C6}
-
-/* ── Status bar ───────────────────────────────────────────────────────── */
-.statusbar{background:var(--warm);border-top:1px solid var(--bdr);
-  padding:7px 28px;font-size:11px;color:var(--mid);
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0}
-.statusbar-ts{color:var(--light);font-size:10px;
-  font-family:'Courier New',monospace}
-
-/* ── Footer ───────────────────────────────────────────────────────────── */
-footer{background:var(--white);border-top:1px solid var(--bdr);
-  padding:8px;text-align:center;font-size:10px;color:var(--light);
-  letter-spacing:.5px;flex-shrink:0}
-
-/* ── Responsive ───────────────────────────────────────────────────────── */
-@media(max-width:900px){
-  .main{grid-template-columns:1fr}
-  .left{border-right:none;border-bottom:1px solid var(--bdr);max-height:none}
-  .ctrl-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:560px){
-  .ctrl-grid{grid-template-columns:1fr}
-  .btn-row{grid-template-columns:1fr}
-  .kpi-row{grid-template-columns:1fr}
-}
-</style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Terminal-like output styling */
+      .terminal-output {
+        font-family: 'Space Grotesk', monospace;
+        font-size: 11px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+      .terminal-output .gold { color: #D4A843; }
+      .terminal-output .silver { color: #9BA8B0; }
+      .terminal-output .bronze { color: #B07D52; }
+      .terminal-output .primary { color: #005da7; }
+      .terminal-output .success { color: #10b981; }
+      .terminal-output .warning { color: #f59e0b; }
+      .terminal-output .error { color: #ef4444; }
+      
+      /* Animation for loading states */
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+      }
+      .pulse-glow {
+        animation: pulse-glow 1.5s ease-in-out infinite;
+      }
+      
+      /* Table styling */
+      .race-table {
+        width: 100%;
+        font-size: 12px;
+      }
+      .race-table th {
+        text-align: left;
+        padding: 12px 8px;
+        font-weight: 600;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #585f6a;
+        border-bottom: 1px solid #e1e2e4;
+      }
+      .race-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #edeef0;
+      }
+      .race-table tr:hover {
+        background: #f2f4f6;
+      }
+      .pos-1 { color: #D4A843; font-weight: 700; }
+      .pos-2 { color: #9BA8B0; font-weight: 700; }
+      .pos-3 { color: #B07D52; font-weight: 700; }
+      
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #e1e2e4;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #005da7;
+        border-radius: 4px;
+      }
+    </style>
 </head>
-<body>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
 
-<!-- ── Header ──────────────────────────────────────────────────────────── -->
-<header class="hdr">
-  <div class="hdr-brand">
-    <div class="hdr-logo">F1</div>
-    <span class="hdr-title">RACE&nbsp;&nbsp;RELAY</span>
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 right-0 z-50 h-16 bg-surface flex justify-between items-center w-full px-6 border-b border-outline-variant/30">
+  <div class="flex items-center gap-8">
+    <span class="text-xl font-bold tracking-tighter text-on-surface font-headline">F1 RACE RELAY</span>
+    <nav class="hidden md:flex items-center gap-6">
+      <select id="nav-year" class="bg-transparent font-headline tracking-wide text-sm font-semibold text-primary border-none focus:ring-0 cursor-pointer">
+        <option value="2024">2024 Season</option>
+        <option value="2023" selected>2023 Season</option>
+        <option value="2022">2022 Season</option>
+        <option value="2021">2021 Season</option>
+      </select>
+      <select id="nav-track" class="bg-transparent font-headline tracking-wide text-sm font-semibold text-on-surface-variant border-none focus:ring-0 cursor-pointer">
+        <option value="Bahrain">Bahrain GP</option>
+        <option value="Monaco" selected>Monaco GP</option>
+        <option value="Silverstone">Silverstone GP</option>
+        <option value="Spa">Spa GP</option>
+        <option value="Monza">Monza GP</option>
+        <option value="Hungaroring">Hungaroring GP</option>
+        <option value="Suzuka">Suzuka GP</option>
+        <option value="Singapore">Singapore GP</option>
+      </select>
+      <span id="active-driver-display" class="font-headline tracking-wide text-sm font-semibold text-on-surface-variant">Max Verstappen</span>
+    </nav>
   </div>
-  <div class="hdr-right">
-    <span class="hdr-author">Stuti Mistry</span>
-    <div class="api-badge" title="API status — click to ping" onclick="pingAPI()">
-      <div class="api-dot" id="api-dot"></div>
-      <span class="api-label" id="api-label">API</span>
+  <div class="flex items-center gap-4">
+    <button id="export-data-btn" class="hidden lg:flex px-4 py-2 bg-surface-container-high text-primary rounded-xl font-headline text-sm font-semibold hover:bg-surface-variant transition-all">Export Data</button>
+    <button id="live-telemetry-btn" class="px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-headline text-sm font-semibold shadow-sm transition-all hover:scale-105 active:scale-95">Live Telemetry</button>
+    <div class="flex items-center gap-2 ml-2">
+      <span class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full cursor-pointer transition-colors">notifications</span>
+      <span class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full cursor-pointer transition-colors">settings</span>
+      <img alt="Profile" class="w-8 h-8 rounded-full ml-2 object-cover border-2 border-primary" src="https://ui-avatars.com/api/?name=F1&background=005da7&color=fff&bold=true"/>
     </div>
   </div>
 </header>
 
-<!-- ── Controls ────────────────────────────────────────────────────────── -->
-<div class="ctrl">
-  <div class="ctrl-grid">
-    <div class="drop-group">
-      <label>Season</label>
-      <select id="sel-year">
-        <option>2024</option><option selected>2023</option>
-        <option>2022</option><option>2021</option>
-      </select>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-20 bg-surface-container-low flex flex-col items-center py-8 gap-8 z-40 mt-16">
+  <div class="flex flex-col items-center gap-6 w-full px-2">
+    <div class="group flex flex-col items-center gap-1 cursor-pointer w-full py-3 bg-white text-primary rounded-xl shadow-sm transition-all" data-tab="dashboard">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+      <span class="font-body text-[9px] uppercase tracking-widest font-bold">Dash</span>
     </div>
-    <div class="drop-group">
-      <label>Grand Prix</label>
-      <select id="sel-track">
-        <option>Bahrain</option><option selected>Monaco</option>
-        <option>Silverstone</option><option>Spa</option>
-        <option>Monza</option><option>Hungaroring</option>
-        <option>Suzuka</option><option>Imola</option>
-        <option>Zandvoort</option><option>Singapore</option>
-      </select>
+    <div class="group flex flex-col items-center gap-1 cursor-pointer w-full py-3 text-on-surface-variant hover:text-primary hover:translate-x-1 transition-all duration-300" data-tab="results">
+      <span class="material-symbols-outlined">leaderboard</span>
+      <span class="font-body text-[9px] uppercase tracking-widest">Results</span>
     </div>
-    <div class="drop-group">
-      <label>Driver 1</label>
-      <select id="sel-d1">
-        <option selected>HAM</option><option>VER</option><option>LEC</option>
-        <option>NOR</option><option>SAI</option><option>RUS</option>
-        <option>PER</option><option>ALO</option>
-      </select>
+    <div class="group flex flex-col items-center gap-1 cursor-pointer w-full py-3 text-on-surface-variant hover:text-primary hover:translate-x-1 transition-all duration-300" data-tab="compare">
+      <span class="material-symbols-outlined">compare_arrows</span>
+      <span class="font-body text-[9px] uppercase tracking-widest">Compare</span>
     </div>
-    <div class="drop-group">
-      <label>Driver 2</label>
-      <select id="sel-d2">
-        <option>HAM</option><option selected>VER</option><option>LEC</option>
-        <option>NOR</option><option>SAI</option><option>RUS</option>
-        <option>PER</option><option>ALO</option>
-      </select>
+    <div class="group flex flex-col items-center gap-1 cursor-pointer w-full py-3 text-on-surface-variant hover:text-primary hover:translate-x-1 transition-all duration-300" data-tab="visuals">
+      <span class="material-symbols-outlined">insights</span>
+      <span class="font-body text-[9px] uppercase tracking-widest">Visuals</span>
     </div>
   </div>
-  <div class="btn-row">
-    <button class="btn btn-primary" id="btn-load"  onclick="loadRace()">
-      ▶&nbsp; Load Race Data
-    </button>
-    <button class="btn btn-primary" id="btn-vis"   onclick="genVis()">
-      ◈&nbsp; Generate Visuals
-    </button>
-    <button class="btn btn-primary" id="btn-cmp"   onclick="compareDrivers()">
-      ⇄&nbsp; Compare Drivers
-    </button>
+  <div class="mt-auto flex flex-col items-center gap-6 w-full px-2 mb-20">
+    <div class="group flex flex-col items-center gap-1 cursor-pointer w-full py-3 text-on-surface-variant hover:text-primary transition-all" onclick="pingAPI()">
+      <span class="material-symbols-outlined">wifi</span>
+      <span class="font-body text-[9px] uppercase tracking-widest">Status</span>
+    </div>
   </div>
-</div>
+</aside>
 
-<!-- ── Main ────────────────────────────────────────────────────────────── -->
-<div class="main">
-
-  <!-- Left panel -->
-  <div class="left">
-
-    <!-- KPI strip -->
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="kpi-label">Winner</div>
-        <div class="kpi-val" id="kpi-winner" style="font-size:14px;letter-spacing:1px">—</div>
+<!-- Main Content -->
+<main class="ml-20 mt-16 p-8 min-h-screen">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Dashboard Header -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <h1 id="dashboard-title" class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">Apex Precision Performance</h1>
+        <p id="dashboard-subtitle" class="text-on-surface-variant font-body mt-1">Real-time telemetry and championship projection</p>
       </div>
-      <div class="kpi">
-        <div class="kpi-label">Laps</div>
-        <div class="kpi-val" id="kpi-laps">—</div>
+      <div class="flex items-center gap-3 bg-surface-container px-4 py-2 rounded-xl">
+        <div class="flex flex-col items-end">
+          <span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">API Status</span>
+          <span id="api-status-text" class="font-headline font-bold text-primary">CONNECTING</span>
+        </div>
+        <div id="api-status-dot" class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
       </div>
     </div>
 
-    <!-- Race info card -->
-    <div class="card card-primary">
-      <div class="card-title">Race Info</div>
-      <div class="kv"><span class="kv-key">Season</span>  <span class="kv-val" id="ci-year">—</span></div>
-      <div class="kv"><span class="kv-key">Circuit</span> <span class="kv-val" id="ci-track">—</span></div>
-      <div class="kv"><span class="kv-key">Event</span>   <span class="kv-val" id="ci-event">—</span></div>
-      <div class="kv"><span class="kv-key">Date</span>    <span class="kv-val" id="ci-date">—</span></div>
-      <div class="kv"><span class="kv-key">Total Laps</span><span class="kv-val" id="ci-laps">—</span></div>
-      <div class="kv"><span class="kv-key">Winner</span>  <span class="kv-val gold" id="ci-winner">—</span></div>
-      <div class="kv"><span class="kv-key">Team</span>    <span class="kv-val" id="ci-team">—</span></div>
-      <div class="kv"><span class="kv-key">Finishers</span><span class="kv-val" id="ci-fin">—</span></div>
+    <!-- Tab Content: Dashboard View -->
+    <div id="dashboard-view" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <!-- KPI: Winner -->
+      <div class="md:col-span-4 bg-surface-container-low rounded-xl p-6 flex flex-col justify-between hover:bg-surface-container-high transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-label text-xs font-bold uppercase tracking-widest text-secondary mb-1">Race Winner</p>
+            <h3 class="font-headline text-lg font-bold">Current Leader</h3>
+          </div>
+          <span class="material-symbols-outlined text-primary">emoji_events</span>
+        </div>
+        <div class="mt-8">
+          <span id="kpi-winner" class="font-label text-5xl font-bold tracking-tighter">—</span>
+        </div>
+        <div class="mt-4 flex items-center gap-2 text-xs font-medium text-primary">
+          <span class="material-symbols-outlined text-sm">flag</span>
+          <span id="kpi-winner-team">—</span>
+        </div>
+      </div>
+
+      <!-- KPI: Fastest Lap -->
+      <div class="md:col-span-4 bg-surface-container-low rounded-xl p-6 flex flex-col justify-between hover:bg-surface-container-high transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-label text-xs font-bold uppercase tracking-widest text-secondary mb-1">Fastest Lap</p>
+            <h3 class="font-headline text-lg font-bold">Purple Sector</h3>
+          </div>
+          <span class="material-symbols-outlined text-primary">speed</span>
+        </div>
+        <div class="mt-8">
+          <span id="kpi-fastest-time" class="font-label text-3xl font-bold">—</span>
+        </div>
+        <div class="mt-4 flex items-center gap-2 text-xs font-medium">
+          <span class="material-symbols-outlined text-sm text-secondary">person</span>
+          <span id="kpi-fastest-driver" class="text-secondary">—</span>
+          <span class="text-secondary ml-2">Lap <span id="kpi-fastest-lap">—</span></span>
+        </div>
+      </div>
+
+      <!-- KPI: Race Info -->
+      <div class="md:col-span-4 bg-gradient-to-br from-primary to-primary-container rounded-xl p-6 text-on-primary flex flex-col justify-between relative overflow-hidden">
+        <div class="relative z-10">
+          <p class="font-label text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Race Information</p>
+          <h3 id="kpi-track" class="font-headline text-lg font-bold">—</h3>
+          <div class="mt-4">
+            <span id="kpi-laps" class="font-label text-4xl font-extrabold tracking-tighter">—</span>
+            <span class="font-label text-sm opacity-80 ml-1">laps</span>
+          </div>
+        </div>
+        <div class="relative z-10 mt-4 flex items-center gap-2 text-xs font-semibold">
+          <span id="kpi-finishers" class="bg-white/20 px-2 py-1 rounded">— finishers</span>
+          <span id="kpi-date" class="bg-white/20 px-2 py-1 rounded">—</span>
+        </div>
+        <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-white/10 text-9xl rotate-12">flag_circle</span>
+      </div>
+
+      <!-- Results Table Preview -->
+      <div class="md:col-span-12 bg-surface-container-low rounded-xl p-6 mt-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-headline text-xl font-bold">Race Classification</h3>
+          <button id="view-full-results" class="text-primary text-sm font-semibold hover:underline">View Full Results →</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="race-table" id="preview-table">
+            <thead>
+              <tr><th>POS</th><th>DRIVER</th><th>TEAM</th><th>TIME</th><th>GAP</th></tr>
+            </thead>
+            <tbody id="preview-tbody">
+              <tr><td colspan="5" class="text-center py-8 text-on-surface-variant">Load race data to see results</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- Fastest lap card -->
-    <div class="card card-accent">
-      <div class="card-title">Fastest Lap</div>
-      <div class="kv"><span class="kv-key">Driver</span>   <span class="kv-val blue" id="fl-drv">—</span></div>
-      <div class="kv"><span class="kv-key">Time</span>     <span class="kv-val" id="fl-time">—</span></div>
-      <div class="kv"><span class="kv-key">Lap No.</span>  <span class="kv-val" id="fl-lap">—</span></div>
-      <div class="kv"><span class="kv-key">Compound</span> <span class="kv-val" id="fl-tire">—</span></div>
+    <!-- Tab Content: Results View (Full Table) -->
+    <div id="results-view" class="hidden">
+      <div class="bg-surface-container-low rounded-xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-headline text-xl font-bold">Full Race Classification</h3>
+          <span id="results-event-name" class="text-on-surface-variant text-sm"></span>
+        </div>
+        <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+          <table class="race-table" id="full-results-table">
+            <thead class="sticky top-0 bg-surface-container-low">
+              <tr><th>POS</th><th>CODE</th><th>DRIVER</th><th>TEAM</th><th>TIME</th><th>GAP</th></tr>
+            </thead>
+            <tbody id="full-results-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- API info card -->
-    <div class="card card-warm">
-      <div class="card-title">Backend</div>
-      <div class="kv"><span class="kv-key">API</span>      <span class="kv-val" id="be-api">localhost:5000</span></div>
-      <div class="kv"><span class="kv-key">Cache</span>    <span class="kv-val" id="be-cache">data_cache/</span></div>
-      <div class="kv"><span class="kv-key">Plots</span>    <span class="kv-val" id="be-plots">—</span></div>
-      <div class="kv"><span class="kv-key">Status</span>   <span class="kv-val green" id="be-status">—</span></div>
+    <!-- Tab Content: Compare View -->
+    <div id="compare-view" class="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-surface-container-low rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <select id="compare-d1" class="bg-surface-container-highest rounded-lg px-4 py-2 font-bold text-lg border-none focus:ring-2 focus:ring-primary">
+              <option>VER</option><option selected>HAM</option><option>LEC</option><option>NOR</option><option>SAI</option><option>RUS</option><option>PER</option><option>ALO</option>
+            </select>
+            <span class="text-on-surface-variant">vs</span>
+            <select id="compare-d2" class="bg-surface-container-highest rounded-lg px-4 py-2 font-bold text-lg border-none focus:ring-2 focus:ring-primary">
+              <option selected>VER</option><option>HAM</option><option>LEC</option><option>NOR</option><option>SAI</option><option>RUS</option><option>PER</option><option>ALO</option>
+            </select>
+          </div>
+          <button id="compare-btn" class="w-full bg-primary text-on-primary rounded-xl py-3 font-semibold hover:bg-primary/90 transition-all">Analyze Head-to-Head</button>
+        </div>
+        <div class="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-6" id="compare-result">
+          <p class="text-on-surface-variant text-center py-8">Select two drivers and click analyze</p>
+        </div>
+      </div>
+      <div id="compare-detail" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+        <div id="driver1-card" class="bg-surface-container-low rounded-xl p-6"></div>
+        <div id="driver2-card" class="bg-surface-container-low rounded-xl p-6"></div>
+      </div>
     </div>
 
-  </div><!-- /left -->
-
-  <!-- Right panel -->
-  <div class="right">
-    <div class="results-hdr">
-      <span class="results-title">Results Display</span>
-      <span class="status-pill s-ready" id="status-pill">Ready</span>
+    <!-- Tab Content: Visuals View -->
+    <div id="visuals-view" class="hidden">
+      <div class="bg-surface-container-low rounded-xl p-6 mb-6">
+        <div class="flex gap-4 items-end">
+          <div class="flex-1">
+            <label class="font-label text-xs uppercase tracking-widest text-secondary block mb-1">Season</label>
+            <select id="vis-year" class="w-full bg-surface-container-highest rounded-lg px-4 py-2 border-none">
+              <option>2024</option><option selected>2023</option><option>2022</option><option>2021</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label class="font-label text-xs uppercase tracking-widest text-secondary block mb-1">Grand Prix</label>
+            <select id="vis-track" class="w-full bg-surface-container-highest rounded-lg px-4 py-2 border-none">
+              <option>Bahrain</option><option selected>Monaco</option><option>Silverstone</option><option>Spa</option><option>Monza</option>
+            </select>
+          </div>
+          <button id="generate-visuals-btn" class="px-6 py-2 bg-primary text-on-primary rounded-xl font-semibold hover:bg-primary/90">Generate Visuals</button>
+        </div>
+      </div>
+      <div id="visuals-output" class="bg-surface-container-low rounded-xl p-6">
+        <p class="text-on-surface-variant text-center py-8">Click Generate Visuals to create professional race analysis charts</p>
+      </div>
     </div>
-    <div class="prog-wrap">
-      <div class="prog-bar" id="prog"></div>
+
+    <!-- Terminal Output (Console-like) -->
+    <div class="mt-8 bg-surface-container rounded-xl p-4 border border-outline-variant/30">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-primary text-sm">terminal</span>
+        <span class="font-label text-xs uppercase tracking-widest text-secondary">Console Output</span>
+      </div>
+      <div id="terminal-output" class="terminal-output font-mono text-xs text-on-surface-variant h-32 overflow-y-auto">
+        <span class="text-secondary">> F1 Race Relay v3.0 · Executive Dashboard</span><br/>
+        <span class="text-secondary">> Ready. Select a race and click "Load Race Data" in controls.</span>
+      </div>
     </div>
-    <div class="terminal" id="terminal"><span class="dim">╔════════════════════════════════════════════════════════════╗
-║   F1 Race Relay  ·  Analysis Dashboard  v2.0               ║
-╚════════════════════════════════════════════════════════════╝
+  </div>
+</main>
 
-  Select a season and circuit above, then use the buttons:
-
-  ▶ LOAD RACE DATA    →  Full race classification table
-  ◈ GENERATE VISUALS  →  Saves charts to output folders
-  ⇄ COMPARE DRIVERS   →  Head-to-head lap delta
-
-  Backend: http://localhost:5000  (run: python api.py)</span>
-    </div>
-  </div><!-- /right -->
-
-</div><!-- /main -->
-
-<!-- ── Status bar ──────────────────────────────────────────────────────── -->
-<div class="statusbar">
-  <span id="statusbar">Ready to analyze Formula 1 races</span>
-  <span class="statusbar-ts" id="statusbar-ts"></span>
+<!-- Control Bar (Floating) -->
+<div class="fixed bottom-8 right-8 flex gap-3 z-50">
+  <button id="load-race-btn" class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-all group relative">
+    <span class="material-symbols-outlined">play_arrow</span>
+    <span class="absolute bottom-full mb-2 right-0 bg-surface-container-highest text-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Load Race</span>
+  </button>
+  <button id="compare-race-btn" class="w-14 h-14 bg-surface-container-high text-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-all group relative">
+    <span class="material-symbols-outlined">compare_arrows</span>
+    <span class="absolute bottom-full mb-2 right-0 bg-surface-container-highest text-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Compare</span>
+  </button>
+  <button id="visuals-race-btn" class="w-14 h-14 bg-surface-container-high text-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-all group relative">
+    <span class="material-symbols-outlined">insights</span>
+    <span class="absolute bottom-full mb-2 right-0 bg-surface-container-highest text-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Visuals</span>
+  </button>
 </div>
-
-<!-- ── Footer ─────────────────────────────────────────────────────────── -->
-<footer>F1 Race Relay v2.0&nbsp;&nbsp;·&nbsp;&nbsp;FastF1 + Flask + Python&nbsp;&nbsp;·&nbsp;&nbsp;Stuti Mistry</footer>
 
 <script>
-/* ── Config ─────────────────────────────────────────────────────────── */
 const API = "http://localhost:5000";
+let currentRaceData = null;
+let activeTab = "dashboard";
 
-/* ── Utility ────────────────────────────────────────────────────────── */
-function q(id){ return document.getElementById(id) }
+// DOM Elements
+const apiDot = document.getElementById('api-status-dot');
+const apiText = document.getElementById('api-status-text');
 
-function pad(str, n, right=false){
-  str = String(str ?? "—");
-  return right ? str.padEnd(n).slice(0,n) : str.padStart(n).slice(0,n);
-}
+// Tab switching
+document.querySelectorAll('[data-tab]').forEach(el => {
+  el.addEventListener('click', () => {
+    const tab = el.getAttribute('data-tab');
+    activeTab = tab;
+    document.getElementById('dashboard-view').classList.add('hidden');
+    document.getElementById('results-view').classList.add('hidden');
+    document.getElementById('compare-view').classList.add('hidden');
+    document.getElementById('visuals-view').classList.add('hidden');
+    document.getElementById(`${tab}-view`).classList.remove('hidden');
+    
+    // Update active styling
+    document.querySelectorAll('[data-tab]').forEach(e => {
+      e.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+      e.classList.add('text-on-surface-variant');
+    });
+    el.classList.add('bg-white', 'text-primary', 'shadow-sm');
+    el.classList.remove('text-on-surface-variant');
+  });
+});
 
-function esc(s){
-  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function setStatus(text, cls){
-  const p = q('status-pill');
-  p.textContent = text;
-  p.className = 'status-pill ' + cls;
-}
-
-function setProgress(pct){
-  q('prog').style.width = pct + '%';
-}
-
-function setStatusBar(msg){
-  q('statusbar').textContent = msg;
-  q('statusbar-ts').textContent = new Date().toLocaleTimeString();
-}
-
-function setBtns(disabled){
-  ['btn-load','btn-vis','btn-cmp'].forEach(id => q(id).disabled = disabled);
-}
-
-function setDot(state){
-  const dot = q('api-dot'), lbl = q('api-label');
-  dot.className = 'api-dot ' + state;
-  lbl.textContent = state === 'ok' ? 'Connected'
-                  : state === 'err' ? 'Offline'
-                  : state === 'loading' ? 'Connecting…'
-                  : 'API';
-}
-
-function terminal(html){
-  q('terminal').innerHTML = html;
-}
-
-/* ── Separators ─────────────────────────────────────────────────────── */
-const SEP76 = '═'.repeat(76);
-const HR76  = '─'.repeat(76);
-const SEP60 = '╌'.repeat(60);
-const BIG60 = '═'.repeat(60);
-
-/* ── API ping ───────────────────────────────────────────────────────── */
-async function pingAPI(){
-  setDot('loading');
+// API Functions
+async function pingAPI() {
+  apiDot.className = "w-2 h-2 rounded-full bg-secondary animate-pulse";
+  apiText.textContent = "CONNECTING";
   try {
-    const res  = await fetch(`${API}/health`, {signal: AbortSignal.timeout(4000)});
+    const res = await fetch(`${API}/health`, {signal: AbortSignal.timeout(4000)});
     const data = await res.json();
-    setDot('ok');
-    q('be-status').textContent = 'Online';
-    q('be-plots').textContent  = data.hasPlots ? 'Enabled' : 'Disabled';
-    setStatusBar('API connected — ' + data.status);
-  } catch(e){
-    setDot('err');
-    q('be-status').textContent = 'Offline';
-    setStatusBar('API offline — run: python api.py');
-    terminal(
-      `<span class="red">✗  Cannot reach API at ${API}</span>\n\n` +
-      `<span class="dim">Make sure the backend is running:\n` +
-      `  pip install flask flask-cors fastf1 pandas\n` +
-      `  python api.py\n\n` +
-      `Then reload this page.</span>`
-    );
+    apiDot.className = "w-2 h-2 rounded-full bg-success";
+    apiText.textContent = "ONLINE";
+    addToTerminal("✓ API connected successfully", "success");
+  } catch(e) {
+    apiDot.className = "w-2 h-2 rounded-full bg-error";
+    apiText.textContent = "OFFLINE";
+    addToTerminal("✗ Cannot reach API. Run: python api.py", "error");
   }
 }
 
-/* ── Load Race ──────────────────────────────────────────────────────── */
-async function loadRace(){
-  const year  = q('sel-year').value;
-  const track = q('sel-track').value;
+function addToTerminal(msg, type = "info") {
+  const term = document.getElementById('terminal-output');
+  const colors = { success: "text-success", error: "text-error", info: "text-secondary", warning: "text-warning" };
+  const span = document.createElement('div');
+  span.className = colors[type] || "text-secondary";
+  span.innerHTML = `> ${msg}`;
+  term.appendChild(span);
+  term.scrollTop = term.scrollHeight;
+  while(term.children.length > 50) term.removeChild(term.firstChild);
+}
 
-  setStatus('Loading…', 's-loading');
-  setStatusBar(`Loading ${year} ${track} Grand Prix…`);
-  setProgress(15);
-  setBtns(true);
-  setDot('loading');
-
+async function loadRaceData() {
+  const year = document.getElementById('nav-year').value;
+  const track = document.getElementById('nav-track').value;
+  
+  addToTerminal(`Loading ${year} ${track} Grand Prix...`, "info");
+  apiDot.className = "w-2 h-2 rounded-full bg-secondary animate-pulse";
+  
   try {
-    setProgress(35);
-    const res  = await fetch(`${API}/race?year=${year}&track=${encodeURIComponent(track)}`);
-    setProgress(70);
+    const res = await fetch(`${API}/race?year=${year}&track=${encodeURIComponent(track)}`);
     const data = await res.json();
-
+    
     if (!data.ok) throw new Error(data.error);
-    setProgress(100);
-
-    /* ── Update left cards ── */
-    q('kpi-winner').textContent = data.winnerCode || data.winner || '—';
-    q('kpi-laps').textContent   = data.totalLaps  || '—';
-    q('ci-year').textContent    = data.year;
-    q('ci-track').textContent   = data.track;
-    q('ci-event').textContent   = data.eventName  || '—';
-    q('ci-date').textContent    = data.eventDate  || '—';
-    q('ci-laps').textContent    = data.totalLaps  || '—';
-    q('ci-winner').textContent  = data.winner     || '—';
-    q('ci-team').textContent    = data.winnerTeam || '—';
-    q('ci-fin').textContent     = data.finishers  || '—';
-    q('fl-drv').textContent     = data.fastestLap?.driver || '—';
-    q('fl-time').textContent    = data.fastestLap?.time   || '—';
-    q('fl-lap').textContent     = data.fastestLap?.lap    || '—';
-    q('fl-tire').textContent    = data.fastestLap?.tire   || '—';
-
-    /* ── Build terminal output ── */
-    let out = '';
-    out += `<span class="sep">${SEP76}</span>\n`;
-    out += `<span class="gold">${esc(data.year)} ${esc(data.eventName || data.track).toUpperCase()} · RACE RESULTS</span>\n`;
-    out += `<span class="sep">${SEP76}</span>\n\n`;
-    out += `<span class="dim">Date       : </span>${esc(data.eventDate)}\n`;
-    out += `<span class="dim">Circuit    : </span>${esc(data.eventName)}\n`;
-    out += `<span class="dim">Total Laps : </span>${esc(data.totalLaps)}\n\n`;
-
-    out += `<span class="hd">${pad('POS',4)}  ${pad('DRV',4)}  ${pad('DRIVER',22,true)}  ${pad('TEAM',22,true)}  ${pad('TIME',13,true)}  GAP</span>\n`;
-    out += `<span class="sep">${HR76}</span>\n`;
-
+    
+    currentRaceData = data;
+    
+    // Update Dashboard KPIs
+    document.getElementById('kpi-winner').textContent = data.winnerCode || data.winner || "—";
+    document.getElementById('kpi-winner-team').textContent = data.winnerTeam || "—";
+    document.getElementById('kpi-fastest-time').textContent = data.fastestLap?.time || "—";
+    document.getElementById('kpi-fastest-driver').textContent = data.fastestLap?.driver || "—";
+    document.getElementById('kpi-fastest-lap').textContent = data.fastestLap?.lap || "—";
+    document.getElementById('kpi-track').textContent = data.eventName || data.track;
+    document.getElementById('kpi-laps').textContent = data.totalLaps || "—";
+    document.getElementById('kpi-finishers').textContent = `${data.finishers || "—"} finishers`;
+    document.getElementById('kpi-date').textContent = data.eventDate || "—";
+    document.getElementById('dashboard-title').textContent = `${data.year} ${data.eventName || data.track} Grand Prix`;
+    document.getElementById('dashboard-subtitle').textContent = `Winner: ${data.winner} (${data.winnerTeam}) · Fastest Lap: ${data.fastestLap?.time}`;
+    document.getElementById('results-event-name').textContent = `${data.year} ${data.eventName}`;
+    
+    // Update preview table
+    const previewBody = document.getElementById('preview-tbody');
+    previewBody.innerHTML = '';
+    (data.results || []).slice(0, 5).forEach(r => {
+      const row = previewBody.insertRow();
+      const posClass = r.pos === 1 ? 'pos-1' : r.pos === 2 ? 'pos-2' : r.pos === 3 ? 'pos-3' : '';
+      row.innerHTML = `
+        <td class="${posClass}">${r.pos}</td>
+        <td class="font-semibold">${escapeHtml(r.code)}</td>
+        <td>${escapeHtml(r.driver)}</td>
+        <td class="text-on-surface-variant">${escapeHtml(r.team)}</td>
+        <td class="font-mono">${escapeHtml(r.time)}</td>
+        <td class="text-on-surface-variant">${escapeHtml(r.gap)}</td>
+      `;
+    });
+    
+    // Update full results table
+    const fullBody = document.getElementById('full-results-tbody');
+    fullBody.innerHTML = '';
     (data.results || []).forEach(r => {
-      const cls = r.pos === 1 ? 'gold'
-                : r.pos === 2 ? 'p2'
-                : r.pos === 3 ? 'p3' : '';
-      const open  = cls ? `<span class="${cls}">` : '';
-      const close = cls ? '</span>'               : '';
-      out += open;
-      out += `${pad(r.pos,4)}  ${pad(esc(r.code),4,true)}  `;
-      out += `${pad(esc(r.driver),22,true)}  `;
-      out += `${pad(esc(r.team),22,true)}  `;
-      out += `${pad(esc(r.time),13,true)}  ${esc(r.gap)}`;
-      out += close + '\n';
+      const row = fullBody.insertRow();
+      const posClass = r.pos === 1 ? 'pos-1' : r.pos === 2 ? 'pos-2' : r.pos === 3 ? 'pos-3' : '';
+      row.innerHTML = `
+        <td class="${posClass} font-bold">${r.pos}</td>
+        <td class="font-mono font-bold">${escapeHtml(r.code)}</td>
+        <td>${escapeHtml(r.driver)}</td>
+        <td class="text-on-surface-variant">${escapeHtml(r.team)}</td>
+        <td class="font-mono">${escapeHtml(r.time)}</td>
+        <td class="text-on-surface-variant">${escapeHtml(r.gap)}</td>
+      `;
     });
-
-    out += `<span class="sep">${HR76}</span>\n\n`;
-    out += `<span class="dim">Fastest Lap : </span><span class="grn">${esc(data.fastestLap?.time)} · ${esc(data.fastestLap?.driver)} (Lap ${esc(data.fastestLap?.lap)} · ${esc(data.fastestLap?.tire)})</span>\n`;
-    out += `<span class="dim">Classified  : </span>${data.finishers} drivers\n`;
-    out += `\n<span class="sep">${SEP76}</span>`;
-
-    terminal(out);
-    setStatus('Loaded', 's-loaded');
-    setDot('ok');
-    setStatusBar(`Loaded: ${year} ${track} Grand Prix  (${data.finishers} classified)`);
-
-  } catch(e){
-    setStatus('Error', 's-error');
-    setDot('err');
-    setStatusBar('Error loading race data');
-    terminal(
-      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
-      `<span class="dim">Check that api.py is running and this circuit is available.</span>`
-    );
-  } finally {
-    setBtns(false);
-    setTimeout(() => setProgress(0), 900);
+    
+    addToTerminal(`✓ Loaded: ${data.finishers} drivers classified · Fastest lap: ${data.fastestLap?.driver} (${data.fastestLap?.time})`, "success");
+    apiDot.className = "w-2 h-2 rounded-full bg-success";
+    
+  } catch(e) {
+    addToTerminal(`✗ Error: ${e.message}`, "error");
+    apiDot.className = "w-2 h-2 rounded-full bg-error";
   }
 }
 
-/* ── Generate Visuals ───────────────────────────────────────────────── */
-async function genVis(){
-  const year  = q('sel-year').value;
-  const track = q('sel-track').value;
-
-  setStatus('Generating…', 's-loading');
-  setStatusBar(`Generating visualizations for ${year} ${track}…`);
-  setProgress(20);
-  setBtns(true);
-  setDot('loading');
-
-  // optimistic terminal message while waiting
-  terminal(
-    `<span class="sep">${SEP76}</span>\n` +
-    `<span class="gold">GENERATE VISUALS  ·  ${esc(year)} ${esc(track).toUpperCase()}</span>\n` +
-    `<span class="sep">${SEP76}</span>\n\n` +
-    `<span class="tag">  Calling Python backend → modern_plots.py …</span>\n` +
-    `<span class="dim">  This may take 20–60 s on first run (FastF1 downloading data)</span>`
-  );
-
-  try {
-    setProgress(45);
-    const res  = await fetch(`${API}/visuals?year=${year}&track=${encodeURIComponent(track)}`);
-    setProgress(85);
-    const data = await res.json();
-
-    if (!data.ok) throw new Error(data.error);
-    setProgress(100);
-
-    let out = '';
-    out += `<span class="sep">${SEP76}</span>\n`;
-    out += `<span class="gold">GENERATE VISUALS  ·  ${esc(year)} ${esc(track).toUpperCase()}</span>\n`;
-    out += `<span class="sep">${SEP76}</span>\n\n`;
-    (data.files || []).forEach(f => {
-      out += `<span class="grn">✓</span>  ${esc(f)}\n`;
-    });
-    out += `\n<span class="dim">Python stack: FastF1 + Matplotlib + Plotly</span>\n`;
-    out += `<span class="dim">Open the files above to view your plots.</span>\n`;
-    out += `\n<span class="sep">${SEP76}</span>`;
-
-    terminal(out);
-    setStatus('Done', 's-loaded');
-    setDot('ok');
-    setStatusBar(`Visuals complete — ${year} ${track}`);
-
-  } catch(e){
-    setStatus('Error', 's-error');
-    setDot('err');
-    setStatusBar('Error generating visuals');
-    terminal(
-      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
-      `<span class="dim">Is modern_plots.py in the same folder as api.py?\n` +
-      `Does it define generate_all_visuals(year, track)?</span>`
-    );
-  } finally {
-    setBtns(false);
-    setTimeout(() => setProgress(0), 900);
-  }
-}
-
-/* ── Compare Drivers ────────────────────────────────────────────────── */
-async function compareDrivers(){
-  const year  = q('sel-year').value;
-  const track = q('sel-track').value;
-  const d1    = q('sel-d1').value;
-  const d2    = q('sel-d2').value;
-
-  if (d1 === d2){
-    setStatus('Error', 's-error');
-    setStatusBar('Please select two different drivers');
-    terminal(`<span class="red">✗  Please select two different drivers to compare.</span>`);
+async function compareDrivers() {
+  const year = document.getElementById('nav-year').value;
+  const track = document.getElementById('nav-track').value;
+  const d1 = document.getElementById('compare-d1').value;
+  const d2 = document.getElementById('compare-d2').value;
+  
+  if (d1 === d2) {
+    addToTerminal("Please select two different drivers", "warning");
     return;
   }
-
-  setStatus('Loading…', 's-loading');
-  setStatusBar(`Comparing ${d1} vs ${d2}  ·  ${year} ${track}…`);
-  setProgress(20);
-  setBtns(true);
-  setDot('loading');
-
+  
+  addToTerminal(`Comparing ${d1} vs ${d2} at ${year} ${track}...`, "info");
+  
   try {
-    setProgress(50);
-    const res  = await fetch(
-      `${API}/compare?year=${year}&track=${encodeURIComponent(track)}&d1=${d1}&d2=${d2}`
-    );
-    setProgress(85);
+    const res = await fetch(`${API}/compare?year=${year}&track=${encodeURIComponent(track)}&d1=${d1}&d2=${d2}`);
     const data = await res.json();
-
+    
     if (!data.ok) throw new Error(data.error);
-    setProgress(100);
-
-    const s1 = data.d1;
-    const s2 = data.d2;
-
-    let out = '';
-    out += `<span class="sep">${BIG60}</span>\n`;
-    out += `<span class="gold">DRIVER COMPARISON  ·  ${esc(d1)}  vs  ${esc(d2)}</span>\n`;
-    out += `<span class="dim">Race: ${esc(year)} ${esc(track)} Grand Prix</span>\n`;
-    out += `<span class="sep">${BIG60}</span>\n\n`;
-
-    out += `<span class="hd">FASTEST LAP</span>\n`;
-    out += `<span class="sep">${SEP60}</span>\n`;
-    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.fastest)}  `;
-    out += `(Lap ${esc(s1.fastLap)})  ·  ${esc(s1.team)}\n`;
-    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.fastest)}  `;
-    out += `(Lap ${esc(s2.fastLap)})  ·  ${esc(s2.team)}\n\n`;
-
-    if (data.faster && data.delta !== null){
-      out += `  <span class="grn">⚡  ${esc(data.faster)} is faster by ${data.delta}s on best lap</span>\n\n`;
-    }
-
-    out += `<span class="hd">AVERAGE LAP</span>\n`;
-    out += `<span class="sep">${SEP60}</span>\n`;
-    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.avgLap)}\n`;
-    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.avgLap)}\n\n`;
-
-    out += `<span class="hd">FINISHING POSITION</span>\n`;
-    out += `<span class="sep">${SEP60}</span>\n`;
-    out += `  <span class="gold">${esc(d1)}</span>  →  P${esc(s1.position)}\n`;
-    out += `  <span class="sky">${esc(d2)}</span>  →  P${esc(s2.position)}\n`;
-    const posWinner = s1.position < s2.position ? d1 : s2.position < s1.position ? d2 : null;
-    if (posWinner){
-      out += `\n  <span class="grn">🏁  ${esc(posWinner)} finished higher on the road</span>\n`;
-    }
-    out += `\n<span class="hd">TOTAL LAPS COMPLETED</span>\n`;
-    out += `<span class="sep">${SEP60}</span>\n`;
-    out += `  <span class="gold">${esc(d1)}</span>  ${esc(s1.totalLaps)} laps\n`;
-    out += `  <span class="sky">${esc(d2)}</span>  ${esc(s2.totalLaps)} laps\n`;
-
-    out += `\n<span class="sep">${BIG60}</span>`;
-
-    terminal(out);
-    setStatus('Loaded', 's-loaded');
-    setDot('ok');
-    setStatusBar(`Comparison complete: ${d1} vs ${d2}  ·  ${year} ${track}`);
-
-  } catch(e){
-    setStatus('Error', 's-error');
-    setDot('err');
-    setStatusBar('Error comparing drivers');
-    terminal(
-      `<span class="red">✗  ${esc(e.message)}</span>\n\n` +
-      `<span class="dim">Make sure both drivers participated in this race.</span>`
-    );
-  } finally {
-    setBtns(false);
-    setTimeout(() => setProgress(0), 900);
+    
+    const resultDiv = document.getElementById('compare-result');
+    resultDiv.innerHTML = `
+      <div class="text-center">
+        <span class="text-3xl font-bold ${data.faster === d1 ? 'text-primary' : 'text-secondary'}">${data.faster}</span>
+        <span class="text-xl mx-2">is faster by</span>
+        <span class="text-3xl font-bold text-primary">${data.delta}s</span>
+        <p class="text-on-surface-variant mt-2">on fastest lap</p>
+      </div>
+    `;
+    
+    const detailDiv = document.getElementById('compare-detail');
+    detailDiv.classList.remove('hidden');
+    
+    const s1 = data.d1, s2 = data.d2;
+    
+    document.getElementById('driver1-card').innerHTML = `
+      <div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-3">
+        <span class="text-4xl font-bold text-primary">${d1}</span>
+        <span class="text-on-surface-variant text-sm">${s1.team}</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between"><span class="text-on-surface-variant">Position</span><span class="font-bold">P${s1.position}</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Fastest Lap</span><span class="font-mono">${s1.fastest} (Lap ${s1.fastLap})</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Average Lap</span><span class="font-mono">${s1.avgLap}</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Total Laps</span><span>${s1.totalLaps}</span></div>
+      </div>
+    `;
+    
+    document.getElementById('driver2-card').innerHTML = `
+      <div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-3">
+        <span class="text-4xl font-bold text-secondary">${d2}</span>
+        <span class="text-on-surface-variant text-sm">${s2.team}</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between"><span class="text-on-surface-variant">Position</span><span class="font-bold">P${s2.position}</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Fastest Lap</span><span class="font-mono">${s2.fastest} (Lap ${s2.fastLap})</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Average Lap</span><span class="font-mono">${s2.avgLap}</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Total Laps</span><span>${s2.totalLaps}</span></div>
+      </div>
+    `;
+    
+    addToTerminal(`✓ Comparison complete: ${data.faster} faster by ${data.delta}s`, "success");
+    
+  } catch(e) {
+    addToTerminal(`✗ Compare error: ${e.message}`, "error");
   }
 }
 
-/* ── Init ───────────────────────────────────────────────────────────── */
-(function init(){
-  // timestamp ticker
-  function tick(){
-    q('statusbar-ts').textContent = new Date().toLocaleTimeString();
+async function generateVisuals() {
+  const year = document.getElementById('vis-year').value;
+  const track = document.getElementById('vis-track').value;
+  
+  addToTerminal(`Generating visuals for ${year} ${track}... This may take 20-60 seconds`, "info");
+  document.getElementById('visuals-output').innerHTML = '<p class="text-center py-8 text-primary animate-pulse">Generating visualizations...</p>';
+  
+  try {
+    const res = await fetch(`${API}/visuals?year=${year}&track=${encodeURIComponent(track)}`);
+    const data = await res.json();
+    
+    if (!data.ok) throw new Error(data.error);
+    
+    const files = data.files || [];
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+    files.forEach(f => {
+      const name = f.split('/').pop();
+      html += `
+        <div class="bg-surface-container-highest rounded-lg p-4 flex justify-between items-center">
+          <div>
+            <span class="material-symbols-outlined text-primary">insert_chart</span>
+            <span class="ml-2 text-sm font-mono">${escapeHtml(name)}</span>
+          </div>
+          <button onclick="window.open('${escapeHtml(f)}', '_blank')" class="text-primary text-sm hover:underline">Open</button>
+        </div>
+      `;
+    });
+    html += '</div>';
+    document.getElementById('visuals-output').innerHTML = html;
+    addToTerminal(`✓ Generated ${files.length} visualizations`, "success");
+    
+  } catch(e) {
+    document.getElementById('visuals-output').innerHTML = `<p class="text-center py-8 text-error">Error: ${escapeHtml(e.message)}</p>`;
+    addToTerminal(`✗ Visual generation failed: ${e.message}`, "error");
   }
-  tick();
-  setInterval(tick, 1000);
+}
 
-  // auto-ping API on load
-  pingAPI();
-})();
+function escapeHtml(str) {
+  if (!str) return "—";
+  return String(str).replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+// Event Listeners
+document.getElementById('load-race-btn').addEventListener('click', loadRaceData);
+document.getElementById('compare-race-btn').addEventListener('click', () => {
+  document.querySelector('[data-tab="compare"]').click();
+});
+document.getElementById('visuals-race-btn').addEventListener('click', () => {
+  document.querySelector('[data-tab="visuals"]').click();
+});
+document.getElementById('compare-btn').addEventListener('click', compareDrivers);
+document.getElementById('generate-visuals-btn').addEventListener('click', generateVisuals);
+document.getElementById('view-full-results').addEventListener('click', () => {
+  document.querySelector('[data-tab="results"]').click();
+});
+document.getElementById('export-data-btn').addEventListener('click', () => {
+  if (currentRaceData) {
+    const dataStr = JSON.stringify(currentRaceData, null, 2);
+    const blob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `f1_race_${currentRaceData.year}_${currentRaceData.track}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToTerminal("✓ Race data exported", "success");
+  } else {
+    addToTerminal("No race data loaded to export", "warning");
+  }
+});
+document.getElementById('live-telemetry-btn').addEventListener('click', () => {
+  addToTerminal("Telemetry stream requires FastF1 session with telemetry=True", "info");
+});
+
+// Initial ping
+pingAPI();
+
+// Update nav selectors to trigger load on change
+document.getElementById('nav-year').addEventListener('change', () => {
+  if (currentRaceData) loadRaceData();
+});
+document.getElementById('nav-track').addEventListener('change', () => {
+  if (currentRaceData) loadRaceData();
+});
+
+addToTerminal("F1 Race Relay Executive Dashboard ready. Click the play button to load race data.", "success");
 </script>
 </body>
 </html>
