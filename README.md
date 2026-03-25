@@ -95,11 +95,10 @@ python main.py
 ```bash
 python launch.py
 ```
-
 ---
 
 ## API Reference
-
+```
 | Endpoint | Parameters | Description |
 |---|---|---|
 | `GET /race` | `year`, `track` | Full race classification |
@@ -107,9 +106,8 @@ python launch.py
 | `GET /visuals` | `year`, `track` | Generate all plot files |
 | `GET /health` | — | API status and config |
 | `GET /seasons` | — | Available years |
-```bash
----
-
+```
+----
 ## Generated Outputs
 
 Visualization files are saved to local folders:
@@ -150,5 +148,3 @@ f1-race-relay/
 ├── dashboards/          # PNG outputs (auto-created)
 └── README.md
 ```
-
----
