@@ -19,6 +19,7 @@ comparison cards.
 **Terminal CLI** — Fully colored ANSI terminal interface for race
 classification, fastest laps, head-to-head comparison, and tyre stint
 summaries.
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/bc3b8b27-fcd8-4ffc-b7c0-36014b864400" />
 
 ---
 
