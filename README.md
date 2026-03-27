@@ -1,24 +1,8 @@
 # F1 Race Relay
 
-A multi-interface Formula 1 race analytics platform that transforms
-FastF1 timing data into interactive dashboards, driver comparisons,
-and broadcast-style visualizations across three separate interfaces.
-
----
-
-## Interfaces
-
-**Web Dashboard** — Browser-based terminal interface powered by a Flask
-REST API. Features real-time loading states, live clock, API health
-monitoring, driver comparison, and visualization triggers.
-
-**Desktop GUI** — PySide6 Qt6 application with tabbed layout, threaded
-data loading, medal-highlighted results table, and head-to-head driver
-comparison cards.
-
-**Terminal CLI** — Fully colored ANSI terminal interface for race
-classification, fastest laps, head-to-head comparison, and tyre stint
-summaries.
+A Formula 1 race analytics platform that transforms FastF1 timing data
+into driver comparisons and race visualizations across three interfaces —
+a Flask-powered web dashboard, a PySide6 desktop GUI, and a terminal CLI.
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/bc3b8b27-fcd8-4ffc-b7c0-36014b864400" />
 
 ---
@@ -109,43 +93,12 @@ python launch.py
 | `GET /seasons` | — | Available years |
 ```
 ----
-## Generated Outputs
+## Data and Outputs
 
-Visualization files are saved to local folders:
-```
-modern_plots/        →  Lap time comparison (PNG, 180 DPI)
-interactive_plots/   →  Race replay dashboard (HTML)
-podium_plots/        →  Podium visualization (PNG)
-dashboards/          →  Full race dashboard (PNG)
-```
+Works with any FastF1-supported season. Tested across 2021–2024 at
+Monaco, Bahrain, Silverstone, Spa, Monza, Suzuka, and more. First load
+per race downloads and caches data locally in `data_cache/` — subsequent
+loads are instant.
 
----
-
-## Supported Races
-
-Works with any FastF1-supported season. Tested with 2021 — 2024
-across Monaco, Bahrain, Silverstone, Spa, Monza, Hungaroring,
-Suzuka, Imola, Zandvoort, and Singapore.
-
-First load per race downloads and caches data locally in
-`data_cache/`. Subsequent loads are instant.
-
----
-
-## Project Structure
-```
-f1-race-relay/
-├── api.py               # Flask REST backend
-├── index.html           # Web dashboard frontend
-├── modern_gui.py        # PySide6 desktop application
-├── modern_plots.py      # Visualization generation engine
-├── main.py              # Terminal CLI
-├── launch.py            # Unified project launcher
-├── requirements.txt     # Dependencies
-├── data_cache/          # FastF1 local cache (auto-created)
-├── modern_plots/        # PNG outputs (auto-created)
-├── interactive_plots/   # HTML outputs (auto-created)
-├── podium_plots/        # PNG outputs (auto-created)
-├── dashboards/          # PNG outputs (auto-created)
-└── README.md
-```
+Visualizations are saved to `modern_plots/`, `interactive_plots/`,
+`podium_plots/`, and `dashboards/`.
